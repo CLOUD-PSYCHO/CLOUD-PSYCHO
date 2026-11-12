@@ -1,4 +1,4 @@
-name: Run Single Cloud PC
+name: Connect Cloud PC to Termux
 on:
   workflow_dispatch:
 jobs:
@@ -6,8 +6,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      
+      # 1. Tailscale Install & Connect kora
+      - name: Setup Tailscale
+        uses: tailscale/github-action@v2
         with:
-          python-version: '3.11'
-      - run: pip install psutil
-      - run: python main.py
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          # Athoba direct auth key use korte paro:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          version: latest
+
+      # 2. SSH Server Enable kora jate Termux theke connect kora jay
+      - name: Enable SSH
+        run: |
+          sudo apt-get update && sudo apt-get install -y openssh-server
+          echo "root:password123" | sudo chpasswd
+          sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+          sudo systemctl restart ssh
+          
+          # Ei khane loop dewa holo jate github actions bondho na hoye jay (4 gonta porjonto cholbe)
+          echo "Cloud PC is ready! Connect via SSH using your Tailscale IP."
+          sleep 4h
