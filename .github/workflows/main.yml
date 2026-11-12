@@ -7,17 +7,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      # 1. Tailscale Install & Connect kora
+      # 1. Tailscale Connect (Direct Key)
       - name: Setup Tailscale
         uses: tailscale/github-action@v2
         with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          # Athoba direct auth key use korte paro:
-          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-          version: latest
+          authkey: tskey-auth-kjXQdcNhEi11CNTRL-VoZYvwk2Wg1E1JSquCm4g1XcbhngyuzvZ
 
-      # 2. SSH Server Enable kora jate Termux theke connect kora jay
+      # 2. SSH Server chalu kora o Tailscale IP dekha
       - name: Enable SSH
         run: |
           sudo apt-get update && sudo apt-get install -y openssh-server
@@ -25,6 +21,8 @@ jobs:
           sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
           sudo systemctl restart ssh
           
-          # Ei khane loop dewa holo jate github actions bondho na hoye jay (4 gonta porjonto cholbe)
-          echo "Cloud PC is ready! Connect via SSH using your Tailscale IP."
+          echo "========================================="
+          echo "Cloud PC Ready! Your Tailscale IP is:"
+          tailscale ip -4
+          echo "========================================="
           sleep 4h
